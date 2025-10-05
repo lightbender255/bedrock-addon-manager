@@ -21,22 +21,22 @@
             <hr>
 
             <h2>World Analysis</h2>
-            <p>Scan for worlds and analyze their addon configurations.</p>
-            <button id="scan-worlds">Scan Worlds</button>
-            <select id="world-selector" class="hidden">
-                <option>Select a world...</option>
-            </select>
+            <p>Select a world to see its details and addon configuration.</p>
+            <div id="world-list" class="world-list-container">
+                <!-- World cards will be populated here -->
+            </div>
         </div>
         <div class="column">
-            <div id="addon-details-container">
+            <div id="addon-details-container" class="hidden">
                 <h2>Addon Details</h2>
                 <div id="addon-list" class="addon-list-container">
                     <!-- Addon details will be populated here -->
                 </div>
             </div>
-            <div id="world-details-container" class="hidden">
+            <div id="world-details-container">
                 <h2>World Details</h2>
                 <div id="world-info" class="world-info-container">
+                    <p>Select a world from the list to see its details.</p>
                     <!-- World details will be populated here -->
                 </div>
                 <h3>Behavior Packs</h3>

@@ -152,9 +152,17 @@ async function handleScanWorlds(event) {
             .map(async (dirent) => {
                 const worldPath = path.join(worldsPath, dirent.name);
                 const levelnamePath = path.join(worldPath, 'levelname.txt');
+                const iconPath = path.join(worldPath, 'world_icon.jpeg');
                 try {
                     const name = await fs.readFile(levelnamePath, 'utf8');
-                    return { name: name.trim(), path: worldPath };
+                    let icon = null;
+                    try {
+                        await fs.access(iconPath);
+                        icon = `file://${iconPath}`;
+                    } catch {
+                        // No icon, that's fine
+                    }
+                    return { name: name.trim(), path: worldPath, icon: icon };
                 } catch (e) {
                     log.warn(`Could not read levelname.txt for ${worldPath}, skipping.`);
                     return null;
