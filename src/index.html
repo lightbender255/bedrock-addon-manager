@@ -8,7 +8,25 @@
   </head>
   <body>
     <h1>Bedrock Addon Manager</h1>
-    <p>Welcome to your Electron application.</p>
+    
+    <div class="container-grid">
+      <div class="container">
+        <h2>Available Addons</h2>
+        <p>Scan common addon folders to find available packs.</p>
+        <div class="button-group">
+          <button id="scan-premium-btn">Scan Marketplace</button>
+          <button id="scan-behavior-btn">Scan Behavior Packs</button>
+          <button id="scan-resource-btn">Scan Resource Packs</button>
+        </div>
+      </div>
+
+      <div class="container">
+        <h2>Addon Details</h2>
+        <div id="addon-list">
+          <p class="placeholder">Select a scan option to see addons</p>
+        </div>
+      </div>
+    </div>
 
     <script src="renderer.js"></script>
   </body>

@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Example of exposing a function to the renderer process
-  // someAction: (...args) => ipcRenderer.invoke('some-action', ...args),
+  scanAddons: (scanType) => ipcRenderer.invoke('scan-addons', scanType),
+  onAddonListUpdate: (callback) => ipcRenderer.on('addon-list-update', callback),
+  log: (level, message) => ipcRenderer.send('log', level, message)
 });

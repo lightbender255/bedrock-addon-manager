@@ -1,11 +1,49 @@
-// This file is required by the index.html file and will
-// be executed in the renderer process for that window.
-// All of the Node.js APIs are available in this process.
+window.electronAPI.log('info', 'Renderer process loaded.');
 
-console.log('Renderer process loaded.');
+const premiumBtn = document.getElementById('scan-premium-btn');
+const behaviorBtn = document.getElementById('scan-behavior-btn');
+const resourceBtn = document.getElementById('scan-resource-btn');
+const addonListDiv = document.getElementById('addon-list');
 
-// You can access functions exposed in preload.js via the window.electronAPI object
-// Example:
-// window.electronAPI.someAction('some-argument').then(result => {
-//   console.log(result);
-// });
+premiumBtn.addEventListener('click', () => scan('premium_cache'));
+behaviorBtn.addEventListener('click', () => scan('development_behavior_packs'));
+resourceBtn.addEventListener('click', () => scan('development_resource_packs'));
+
+function scan(scanType) {
+  window.electronAPI.log('info', `Scan button clicked for: ${scanType}`);
+  addonListDiv.innerHTML = `<p class="placeholder">Scanning...</p>`;
+  window.electronAPI.scanAddons(scanType);
+}
+
+window.electronAPI.onAddonListUpdate((_event, addons) => {
+  addonListDiv.innerHTML = '';
+  if (addons.length === 0) {
+    addonListDiv.innerHTML = `<p class="placeholder">No addons found.</p>`;
+    return;
+  }
+
+  addons.forEach(addon => {
+    const item = document.createElement('div');
+    item.className = 'addon-item';
+
+    const icon = document.createElement('img');
+    icon.src = addon.icon || 'placeholder.png'; // Use a placeholder if no icon
+    icon.className = 'addon-icon';
+    icon.onerror = () => { icon.src = 'placeholder.png'; }; // Fallback for broken images
+
+    const details = document.createElement('div');
+    details.className = 'addon-details';
+
+    const name = document.createElement('h3');
+    name.textContent = addon.name;
+
+    const description = document.createElement('p');
+    description.textContent = addon.description;
+
+    details.appendChild(name);
+    details.appendChild(description);
+    item.appendChild(icon);
+    item.appendChild(details);
+    addonListDiv.appendChild(item);
+  });
+});

@@ -1,11 +1,97 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     padding: 20px;
-    background-color: #f4f4f4;
+    background-color: #f0f2f5;
     color: #333;
 }
 
 h1 {
-    font-size: 24px;
+    font-size: 28px;
     color: #111;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 20px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 8px;
+    margin-top: 0;
+}
+
+.container-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 20px;
+}
+
+.container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+button {
+    background-color: #0078d4;
+    color: white;
+    border: none;
+    padding: 12px 15px;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: left;
+}
+
+button:hover {
+    background-color: #005a9e;
+}
+
+#addon-list {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.addon-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.addon-item:last-child {
+    border-bottom: none;
+}
+
+.addon-icon {
+    width: 64px;
+    height: 64px;
+    margin-right: 15px;
+    object-fit: contain;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+}
+
+.addon-details h3 {
+    margin: 0 0 5px 0;
+    font-size: 16px;
+}
+
+.addon-details p {
+    margin: 0;
+    font-size: 12px;
+    color: #666;
+}
+
+.placeholder {
+    color: #888;
+    text-align: center;
+    padding: 50px 0;
 }
