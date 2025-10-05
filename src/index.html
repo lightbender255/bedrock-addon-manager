@@ -7,27 +7,49 @@
     <link rel="stylesheet" href="styles.css">
   </head>
   <body>
-    <h1>Bedrock Addon Manager</h1>
-    
-    <div class="container-grid">
-      <div class="container">
-        <h2>Available Addons</h2>
-        <p>Scan common addon folders to find available packs.</p>
-        <div class="button-group">
-          <button id="scan-premium-btn">Scan Marketplace</button>
-          <button id="scan-behavior-btn">Scan Behavior Packs</button>
-          <button id="scan-resource-btn">Scan Resource Packs</button>
-        </div>
-      </div>
-
-      <div class="container">
-        <h2>Addon Details</h2>
-        <div id="addon-list">
-          <p class="placeholder">Select a scan option to see addons</p>
-        </div>
-      </div>
+    <div class="header">
+        <h1>Bedrock Addon Manager</h1>
     </div>
+    <div class="container">
+        <div class="column">
+            <h2>Available Addons</h2>
+            <p>Scan common addon folders to find available packs.</p>
+            <button id="scan-marketplace">Scan Marketplace</button>
+            <button id="scan-behavior-packs">Scan Behavior Packs</button>
+            <button id="scan-resource-packs">Scan Resource Packs</button>
 
-    <script src="renderer.js"></script>
+            <hr>
+
+            <h2>World Analysis</h2>
+            <p>Scan for worlds and analyze their addon configurations.</p>
+            <button id="scan-worlds">Scan Worlds</button>
+            <select id="world-selector" class="hidden">
+                <option>Select a world...</option>
+            </select>
+        </div>
+        <div class="column">
+            <div id="addon-details-container">
+                <h2>Addon Details</h2>
+                <div id="addon-list" class="addon-list-container">
+                    <!-- Addon details will be populated here -->
+                </div>
+            </div>
+            <div id="world-details-container" class="hidden">
+                <h2>World Details</h2>
+                <div id="world-info" class="world-info-container">
+                    <!-- World details will be populated here -->
+                </div>
+                <h3>Behavior Packs</h3>
+                <div id="world-behavior-packs" class="addon-list-container">
+                    <!-- World behavior packs will be populated here -->
+                </div>
+                <h3>Resource Packs</h3>
+                <div id="world-resource-packs" class="addon-list-container">
+                    <!-- World resource packs will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./renderer.js"></script>
   </body>
 </html>

@@ -59,11 +59,32 @@ button:hover {
     overflow-y: auto;
 }
 
+.addon-list-container {
+    max-height: 500px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.world-info-container {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background-color: #f9f9f9;
+}
+
 .addon-item {
     display: flex;
     align-items: center;
     padding: 10px;
     border-bottom: 1px solid #eee;
+}
+
+.addon-item.missing {
+    opacity: 0.6;
+    background-color: #fff0f0;
 }
 
 .addon-item:last-child {
@@ -90,8 +111,22 @@ button:hover {
     color: #666;
 }
 
+.addon-text h4 {
+    margin: 0 0 5px 0;
+}
+
+.addon-text p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #555;
+}
+
 .placeholder {
     color: #888;
     text-align: center;
     padding: 50px 0;
+}
+
+.hidden {
+    display: none;
 }

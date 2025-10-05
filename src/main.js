@@ -141,6 +141,158 @@ async function handleScanAddons(event, scanType) {
   }
 }
 
+async function handleScanWorlds(event) {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    const worldsPath = path.join(minecraftPath, 'minecraftWorlds');
+    try {
+        log.info(`Scanning for worlds in: ${worldsPath}`);
+        const worldFolders = await fs.readdir(worldsPath, { withFileTypes: true });
+        const worldDetailsPromises = worldFolders
+            .filter(dirent => dirent.isDirectory())
+            .map(async (dirent) => {
+                const worldPath = path.join(worldsPath, dirent.name);
+                const levelnamePath = path.join(worldPath, 'levelname.txt');
+                try {
+                    const name = await fs.readFile(levelnamePath, 'utf8');
+                    return { name: name.trim(), path: worldPath };
+                } catch (e) {
+                    log.warn(`Could not read levelname.txt for ${worldPath}, skipping.`);
+                    return null;
+                }
+            });
+
+        const worlds = (await Promise.all(worldDetailsPromises)).filter(Boolean);
+        log.info(`Found ${worlds.length} worlds.`);
+        win.webContents.send('world-list-update', worlds);
+    } catch (error) {
+        log.error('Failed to scan for worlds:', error);
+        // Optionally send an error to the renderer
+    }
+}
+
+async function handleGetWorldDetails(event, worldPath) {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    try {
+        log.info(`Getting details for world: ${worldPath}`);
+        // 1. Get world stats
+        const stats = await fs.stat(worldPath);
+        const levelname = await fs.readFile(path.join(worldPath, 'levelname.txt'), 'utf8');
+
+        // Simple folder size calculation
+        let totalSize = 0;
+        const files = await fs.readdir(worldPath, { withFileTypes: true, recursive: true });
+        for (const file of files) {
+            try {
+                const filePath = path.join(file.path, file.name);
+                const fileStats = await fs.stat(filePath);
+                if (fileStats.isFile()) {
+                    totalSize += fileStats.size;
+                }
+            } catch (e) {
+                log.warn(`Could not stat file ${file.name} in world folder: ${e.message}`);
+            }
+        }
+        
+        const details = {
+            name: levelname.trim(),
+            lastModified: stats.mtime,
+            sizeInMB: (totalSize / (1024 * 1024)).toFixed(2),
+            behaviorPacks: [],
+            resourcePacks: []
+        };
+
+        // 2. Get all available addons to cross-reference
+        const allAddons = await getAllAddons();
+
+        // 3. Process world behavior packs
+        details.behaviorPacks = await processWorldPacks(worldPath, 'world_behavior_packs.json', allAddons);
+
+        // 4. Process world resource packs
+        details.resourcePacks = await processWorldPacks(worldPath, 'world_resource_packs.json', allAddons);
+
+        log.info(`Sending details for world ${details.name}`);
+        win.webContents.send('world-details-update', details);
+
+    } catch (error) {
+        log.error(`Failed to get details for world ${worldPath}:`, error);
+        // Optionally send an error to the renderer
+    }
+}
+
+async function processWorldPacks(worldPath, fileName, allAddons) {
+    const worldPacksPath = path.join(worldPath, fileName);
+    const worldPacks = [];
+    try {
+        const worldPacksData = await fs.readFile(worldPacksPath, 'utf8');
+        const worldPacksJson = JSON.parse(worldPacksData);
+
+        for (const pack of worldPacksJson) {
+            const foundAddon = allAddons.find(addon => addon.uuid === pack.pack_id);
+            if (foundAddon) {
+                worldPacks.push({ ...foundAddon, missing: false });
+            } else {
+                worldPacks.push({
+                    name: 'Missing Pack',
+                    description: `UUID: ${pack.pack_id}`,
+                    uuid: pack.pack_id,
+                    version: pack.version.join('.'),
+                    missing: true,
+                    icon: null
+                });
+            }
+        }
+    } catch (e) {
+        if (e.code !== 'ENOENT') {
+            log.warn(`Could not read ${fileName} for ${worldPath}: ${e.message}`);
+        }
+    }
+    return worldPacks;
+}
+
+// Helper to get all addons from all sources
+async function getAllAddons() {
+    const sources = [
+        path.join(path.dirname(path.dirname(minecraftPath)), 'premium_cache', 'behavior_packs'),
+        path.join(path.dirname(path.dirname(minecraftPath)), 'premium_cache', 'resource_packs'),
+        path.join(minecraftPath, 'development_behavior_packs'),
+        path.join(minecraftPath, 'development_resource_packs')
+    ];
+
+    const allAddonFolders = [];
+    for (const source of sources) {
+        try {
+            const entries = await fs.readdir(source, { withFileTypes: true });
+            const addonFolders = entries
+                .filter(dirent => dirent.isDirectory())
+                .map(dirent => path.join(source, dirent.name));
+            allAddonFolders.push(...addonFolders);
+        } catch (e) {
+            if (e.code !== 'ENOENT') {
+                log.warn(`Directory not found during all-addon scan: ${source}`);
+            }
+        }
+    }
+
+    const addonDetailsPromises = allAddonFolders.map(async folder => {
+        const details = await getAddonDetails(folder);
+        if (details) {
+            // We need the UUID for matching, let's add it.
+            try {
+                const manifestData = await fs.readFile(path.join(folder, 'manifest.json'), 'utf8');
+                const manifest = JSON.parse(manifestData);
+                details.uuid = manifest.header.uuid;
+                details.version = manifest.header.version.join('.');
+            } catch (e) {
+                return null;
+            }
+        }
+        return details;
+    });
+
+    return (await Promise.all(addonDetailsPromises)).filter(Boolean);
+}
+
+
 function createWindow () {
   const mainWindow = new BrowserWindow({
     width: 800,
@@ -160,6 +312,8 @@ function createWindow () {
 
 app.whenReady().then(() => {
   ipcMain.handle('scan-addons', handleScanAddons);
+  ipcMain.handle('scan-worlds', handleScanWorlds);
+  ipcMain.handle('get-world-details', handleGetWorldDetails);
   
   // Handle logs from renderer process
   ipcMain.on('log', (event, level, message) => {
