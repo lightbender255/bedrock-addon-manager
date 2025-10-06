@@ -120,10 +120,11 @@ window.electronAPI.onWorldDetailsUpdate((details) => {
     window.electronAPI.log('info', `Received details for world: ${details.name}`);
     // World Info
     worldInfoDiv.innerHTML = `
-        <h4>${details.name}</h4>
+        <h4></h4>
         <p><strong>Last Played:</strong> ${new Date(details.lastModified).toLocaleString()}</p>
         <p><strong>Size:</strong> ${details.sizeInMB} MB</p>
     `;
+    worldInfoDiv.querySelector('h4').textContent = details.name;
 
     // Behavior Packs
     renderPackList(worldBehaviorPacksDiv, details.behaviorPacks, 'No behavior packs applied.');
