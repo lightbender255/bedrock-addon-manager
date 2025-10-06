@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const log = require('electron-log');
 
 // Configure logging
-log.transports.file.resolvePath = () => path.join(__dirname, 'logs/main.log');
+log.transports.file.path = path.join(__dirname, 'logs/main.log');
 log.transports.file.level = 'info';
 log.info('App starting...');
 
@@ -302,6 +302,16 @@ async function getAllAddons() {
 
 
 function createWindow () {
+  // Register IPC handlers
+  ipcMain.handle('scan-addons', handleScanAddons);
+  ipcMain.handle('scan-worlds', handleScanWorlds);
+  ipcMain.handle('get-world-details', handleGetWorldDetails);
+  
+  // Handle logs from renderer process
+  ipcMain.on('log', (event, level, message) => {
+    log[level](message);
+  });
+
   const mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -319,15 +329,6 @@ function createWindow () {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('scan-addons', handleScanAddons);
-  ipcMain.handle('scan-worlds', handleScanWorlds);
-  ipcMain.handle('get-world-details', handleGetWorldDetails);
-  
-  // Handle logs from renderer process
-  ipcMain.on('log', (event, level, message) => {
-    log[level](message);
-  });
-
   createWindow();
 
   app.on('activate', function () {
