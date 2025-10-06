@@ -32,6 +32,7 @@ function parseLangFile(data) {
     return translations;
 }
 
+const bdsPath = 'C:\\game\\game_servers\\bedrock-server-1.21';
 const minecraftPath = path.join(process.env.LOCALAPPDATA, 'Packages', 'Microsoft.MinecraftUWP_8wekyb3d8bbwe', 'LocalState', 'games', 'com.mojang');
 
 async function getAddonDetails(addonPath) {
@@ -143,7 +144,7 @@ async function handleScanAddons(event, scanType) {
 
 async function handleScanWorlds(event) {
     const win = BrowserWindow.fromWebContents(event.sender);
-    const worldsPath = path.join(minecraftPath, 'minecraftWorlds');
+    const worldsPath = path.join(bdsPath, 'worlds');
     try {
         log.info(`Scanning for worlds in: ${worldsPath}`);
         const worldFolders = await fs.readdir(worldsPath, { withFileTypes: true });
@@ -260,10 +261,16 @@ async function processWorldPacks(worldPath, fileName, allAddons) {
 // Helper to get all addons from all sources
 async function getAllAddons() {
     const sources = [
+        // UWP Paths
         path.join(path.dirname(path.dirname(minecraftPath)), 'premium_cache', 'behavior_packs'),
         path.join(path.dirname(path.dirname(minecraftPath)), 'premium_cache', 'resource_packs'),
         path.join(minecraftPath, 'development_behavior_packs'),
-        path.join(minecraftPath, 'development_resource_packs')
+        path.join(minecraftPath, 'development_resource_packs'),
+        // BDS Paths
+        path.join(bdsPath, 'behavior_packs'),
+        path.join(bdsPath, 'resource_packs'),
+        path.join(bdsPath, 'development_behavior_packs'),
+        path.join(bdsPath, 'development_resource_packs')
     ];
 
     const allAddonFolders = [];
@@ -323,6 +330,11 @@ function createWindow () {
   });
 
   mainWindow.loadFile('src/index.html');
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    log.info('Main window finished loading. Sending main-process-ready signal.');
+    mainWindow.webContents.send('main-process-ready');
+  });
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
