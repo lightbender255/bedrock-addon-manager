@@ -8,6 +8,11 @@ The goal is to create a centralized dashboard to manage the complex relationship
 
 ## Core Features
 
+-   **World Source Selection:**
+    -   Switch between Dedicated Server worlds and Local UWP Minecraft worlds
+    -   Persistent user preference - remembers your last selected world source
+    -   Automatic world discovery for both sources
+
 -   **Addon Discovery:**
     -   Automatically scan and list available addons from the Minecraft Marketplace `premium_cache` folder.
     -   Support for adding and managing addons from other custom sources.

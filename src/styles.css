@@ -171,3 +171,60 @@ button:hover {
 .hidden {
     display: none;
 }
+
+.world-source-selector {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #e0e0e0;
+}
+
+.world-source-selector label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+.world-source-selector label:first-child {
+    margin-bottom: 8px;
+}
+
+.world-source-selector label:not(:first-child) {
+    display: inline-block;
+    margin-right: 15px;
+    margin-bottom: 0;
+    font-weight: normal;
+    cursor: pointer;
+}
+
+.world-source-selector input[type="radio"] {
+    margin-right: 5px;
+}
+
+.world-source-selector {
+    background-color: #f8f9fa;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #e0e0e0;
+}
+
+.world-source-selector label:first-child {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.world-source-selector label {
+    display: inline-block;
+    margin-right: 20px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.world-source-selector input[type="radio"] {
+    margin-right: 6px;
+}

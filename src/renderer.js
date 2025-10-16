@@ -1,7 +1,18 @@
-window.electronAPI.onMainProcessReady(() => {
+window.electronAPI.onMainProcessReady(async () => {
     window.electronAPI.log('info', 'Main process is ready. Initializing world scan.');
-    // Initial scan for worlds when the app is ready
-    window.electronAPI.scanWorlds();
+    
+    // Load saved world source preference
+    const savedWorldSource = await window.electronAPI.getSetting('worldSource', 'dedicated-server');
+    window.electronAPI.log('info', `Loading saved world source preference: ${savedWorldSource}`);
+    
+    // Set the radio button to match the saved preference
+    const radioButton = document.querySelector(`input[name="world-source"][value="${savedWorldSource}"]`);
+    if (radioButton) {
+        radioButton.checked = true;
+    }
+    
+    // Initial scan for worlds using saved preference
+    window.electronAPI.scanWorlds(savedWorldSource);
 });
 
 window.electronAPI.log('info', 'Renderer process loaded.');
@@ -65,10 +76,27 @@ const refreshWorldsBtn = document.getElementById('refresh-worlds');
 
 let selectedWorldCard = null;
 
-refreshWorldsBtn.addEventListener('click', () => {
-    window.electronAPI.log('info', 'Refresh worlds button clicked.');
+refreshWorldsBtn.addEventListener('click', async () => {
+    const selectedWorldSource = document.querySelector('input[name="world-source"]:checked').value;
+    window.electronAPI.log('info', `Refresh worlds button clicked for source: ${selectedWorldSource}`);
     worldListDiv.innerHTML = '<p class="placeholder">Scanning for worlds...</p>';
-    window.electronAPI.scanWorlds();
+    window.electronAPI.scanWorlds(selectedWorldSource);
+});
+
+// Add event listeners for radio button changes
+document.querySelectorAll('input[name="world-source"]').forEach(radio => {
+    radio.addEventListener('change', async () => {
+        if (radio.checked) {
+            window.electronAPI.log('info', `World source changed to: ${radio.value}`);
+            
+            // Save the preference
+            await window.electronAPI.setSetting('worldSource', radio.value);
+            window.electronAPI.log('info', `Saved world source preference: ${radio.value}`);
+            
+            worldListDiv.innerHTML = '<p class="placeholder">Scanning for worlds...</p>';
+            window.electronAPI.scanWorlds(radio.value);
+        }
+    });
 });
 
 window.electronAPI.onWorldListUpdate((worlds) => {

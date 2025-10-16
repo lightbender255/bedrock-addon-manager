@@ -22,6 +22,19 @@
 
             <h2>World Analysis</h2>
             <p>Select a world to see its details and addon configuration.</p>
+            
+            <div class="world-source-selector">
+                <label>World Source:</label>
+                <label>
+                    <input type="radio" name="world-source" value="local">
+                    Local Worlds
+                </label>
+                <label>
+                    <input type="radio" name="world-source" value="dedicated-server" checked>
+                    Dedicated Server
+                </label>
+            </div>
+            
             <button id="refresh-worlds">Refresh Worlds</button>
             <div id="world-list" class="world-list-container">
                 <!-- World cards will be populated here -->

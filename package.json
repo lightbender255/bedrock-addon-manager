@@ -5,6 +5,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
+    "dev": "cross-env NODE_ENV=development electron .",
     "dist": "electron-builder",
     "test": "playwright test"
   },
@@ -32,12 +33,15 @@
   "license": "ISC",
   "devDependencies": {
     "@playwright/test": "^1.44.1",
-    "electron": "^31.0.1",
+    "cross-env": "^10.1.0",
+    "electron": "^38.3.0",
     "electron-builder": "^24.13.3",
     "electron-playwright-helpers": "^1.0.0",
+    "electron-reload": "^2.0.0-alpha.1",
     "playwright": "^1.44.1"
   },
   "dependencies": {
-    "electron-log": "^5.1.5"
+    "electron-log": "^5.1.5",
+    "electron-store": "^8.1.0"
   }
 }

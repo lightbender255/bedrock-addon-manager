@@ -2,6 +2,18 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const fs = require('fs').promises;
 const log = require('electron-log');
+const Store = require('electron-store');
+
+// Initialize settings store
+const store = new Store();
+
+// Enable hot reload for development
+if (process.env.NODE_ENV === 'development') {
+  require('electron-reload')(__dirname, {
+    electron: path.join(__dirname, '..', 'node_modules', '.bin', 'electron'),
+    hardResetMethod: 'exit'
+  });
+}
 
 // Configure logging
 log.transports.file.path = path.join(__dirname, 'logs/main.log');
@@ -142,20 +154,42 @@ async function handleScanAddons(event, scanType) {
   }
 }
 
-async function handleScanWorlds(event) {
+async function handleScanWorlds(event, worldSource = 'dedicated-server') {
     const win = BrowserWindow.fromWebContents(event.sender);
-    const worldsPath = path.join(bdsPath, 'worlds');
+    
+    // Determine which worlds directory to scan based on the source
+    let worldsPath;
+    if (worldSource === 'local') {
+        worldsPath = path.join(minecraftPath, 'minecraftWorlds');
+    } else {
+        worldsPath = path.join(bdsPath, 'worlds');
+    }
+    
     try {
-        log.info(`Scanning for worlds in: ${worldsPath}`);
+        log.info(`Scanning for ${worldSource} worlds in: ${worldsPath}`);
         const worldFolders = await fs.readdir(worldsPath, { withFileTypes: true });
         const worldDetailsPromises = worldFolders
             .filter(dirent => dirent.isDirectory())
             .map(async (dirent) => {
                 const worldPath = path.join(worldsPath, dirent.name);
-                const levelnamePath = path.join(worldPath, 'levelname.txt');
-                const iconPath = path.join(worldPath, 'world_icon.jpeg');
+                
+                // Try different potential name files for different world types
+                let levelnamePath = path.join(worldPath, 'levelname.txt');
+                let iconPath = path.join(worldPath, 'world_icon.jpeg');
+                
                 try {
-                    const name = await fs.readFile(levelnamePath, 'utf8');
+                    let name;
+                    try {
+                        name = await fs.readFile(levelnamePath, 'utf8');
+                    } catch (e) {
+                        // For local worlds, try level.dat or use folder name as fallback
+                        if (worldSource === 'local') {
+                            name = dirent.name; // Use folder name as fallback for local worlds
+                        } else {
+                            throw e; // Re-throw for dedicated server worlds
+                        }
+                    }
+                    
                     let icon = null;
                     try {
                         await fs.access(iconPath);
@@ -163,9 +197,15 @@ async function handleScanWorlds(event) {
                     } catch {
                         // No icon, that's fine
                     }
-                    return { name: name.trim(), path: worldPath, icon: icon };
+                    
+                    return { 
+                        name: name.trim(), 
+                        path: worldPath, 
+                        icon: icon,
+                        source: worldSource 
+                    };
                 } catch (e) {
-                    log.warn(`Could not read levelname.txt for ${worldPath}, skipping.`);
+                    log.warn(`Could not read world info for ${worldPath}, skipping.`);
                     return null;
                 }
             });
@@ -313,6 +353,16 @@ function createWindow () {
   ipcMain.handle('scan-addons', handleScanAddons);
   ipcMain.handle('scan-worlds', handleScanWorlds);
   ipcMain.handle('get-world-details', handleGetWorldDetails);
+  
+  // Settings handlers
+  ipcMain.handle('get-setting', (event, key, defaultValue) => {
+    return store.get(key, defaultValue);
+  });
+  
+  ipcMain.handle('set-setting', (event, key, value) => {
+    store.set(key, value);
+    return true;
+  });
   
   // Handle logs from renderer process
   ipcMain.on('log', (event, level, message) => {
