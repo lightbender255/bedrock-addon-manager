@@ -116,3 +116,8 @@ public
 # Electron build output
 dist/
 release/
+
+# Test results (Playwright)
+test-results/
+playwright-report/
+test-results.html
